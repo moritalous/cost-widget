@@ -75,8 +75,9 @@ scripts/
   ├─ pack.ps1                Build the unsigned, Store-ready .msix
   └─ generate-assets.ps1     Regenerate icon / screenshot PNGs
 .github/workflows/
-  ├─ ci.yml                  Build + format check on push/PR
-  └─ store-package.yml       Build the Store .msix and upload it as an artifact on v* tags
+  ├─ ci.yml                    Build + format check on push/PR
+  ├─ check-ccusage-update.yml  Daily check for a newer ccusage; bumps versions and tags
+  └─ store-package.yml         Build the Store .msix and upload it as an artifact on v* tags
 ccusage.version              Bundled ccusage version (single source of truth)
 ```
 
@@ -107,6 +108,7 @@ Pricing is looked up online (no `--offline` flag) because ccusage's offline pric
 - The app follows **semantic versioning** (tag `v0.1.0` → package identity version `0.1.0.0`)
 - The bundled ccusage version is pinned in [ccusage.version](ccusage.version), independent of the app version. Bumping it warrants at least a PATCH release
 - The bundled version is also shown at runtime in the widget footer
+- **check-ccusage-update.yml** checks the npm registry daily; if a newer `@ccusage/ccusage-win32-x64` is found, it bumps `ccusage.version` and the app's patch version, commits, and pushes a new tag. That triggers **store-package.yml**, which builds the msix and opens an issue as a reminder — actually uploading the package to Partner Center stays a manual step
 
 ### Publishing to the Store
 

@@ -4,6 +4,10 @@ name: Store package
 # Download it from the run and upload it in Partner Center. Distribution is via
 # the Microsoft Store; GitHub hosts source only (no binary Releases).
 #
+# Tags pushed by check-ccusage-update.yml (or manually) trigger this. On
+# success, an issue is opened as a reminder to upload the package in Partner
+# Center, since Store submission itself stays manual.
+#
 # Requires three repository variables (Settings > Secrets and variables >
 # Actions > Variables), taken from Partner Center > Product identity:
 #   STORE_IDENTITY_NAME           e.g. moritalous.TokenCostWidget
@@ -13,6 +17,10 @@ on:
   push:
     tags: ['v*']
   workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
 
 jobs:
   build:
@@ -48,3 +56,18 @@ jobs:
           name: store-msix
           path: build/TokenCostWidget_*.msix
           if-no-files-found: error
+
+      - name: Notify
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $runUrl = "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          $body = @"
+msix のビルドが完了しました。Partner Center でパッケージをアップロードしてください。
+
+- タグ: ${{ github.ref_name }}
+- ワークフロー実行: $runUrl
+- Partner Center: https://partner.microsoft.com/dashboard/products/9NP02K9JKHNV/overview
+"@
+          gh issue create --title "Store 提出準備完了: ${{ github.ref_name }}" --body $body

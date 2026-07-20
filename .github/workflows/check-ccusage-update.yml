@@ -1,0 +1,61 @@
+name: Check ccusage update
+
+# Checks the npm registry once a day for a newer ccusage native binary. If one
+# is found, bumps ccusage.version and the app's patch version, then pushes a
+# new tag. That tag push triggers store-package.yml, which builds the Store
+# msix and (on success) opens an issue as a reminder to upload it in Partner
+# Center. The actual Store submission stays manual.
+on:
+  schedule:
+    - cron: '0 0 * * *' # 09:00 JST daily
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compare versions
+        id: compare
+        shell: bash
+        run: |
+          current=$(cat ccusage.version)
+          latest=$(curl -sf https://registry.npmjs.org/@ccusage/ccusage-win32-x64/latest | jq -r '.version')
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+          echo "latest=$latest" >> "$GITHUB_OUTPUT"
+          if [ "$current" != "$latest" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Bump app version
+        if: steps.compare.outputs.changed == 'true'
+        id: bump
+        shell: bash
+        run: |
+          manifest=src/CostWidgetProvider/AppxManifest.xml
+          current_app=$(grep -oP 'Version="\K[0-9]+\.[0-9]+\.[0-9]+(?=\.0")' "$manifest")
+          IFS='.' read -r major minor patch <<< "$current_app"
+          new_app="$major.$minor.$((patch + 1))"
+          sed -i "s/Version=\"$current_app\.0\"/Version=\"$new_app.0\"/" "$manifest"
+          echo "new_app=$new_app" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and tag
+        if: steps.compare.outputs.changed == 'true'
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          printf '%s' "${{ steps.compare.outputs.latest }}" > ccusage.version
+          git add ccusage.version src/CostWidgetProvider/AppxManifest.xml
+          git commit -m "ccusage を ${{ steps.compare.outputs.latest }} に更新 (v${{ steps.bump.outputs.new_app }})"
+          git tag "v${{ steps.bump.outputs.new_app }}"
+          git push origin main
+          git push origin "v${{ steps.bump.outputs.new_app }}"
