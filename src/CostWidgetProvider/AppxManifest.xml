@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  xmlns:com="http://schemas.microsoft.com/appx/manifest/com/windows10"
+  IgnorableNamespaces="uap uap3 rescap com">
+
+  <!-- App semantic version + trailing 0. The bundled ccusage version is pinned in ccusage.version. -->
+  <Identity Name="CostWidget"
+            Publisher="CN=moritalous"
+            Version="0.1.0.0"
+            ProcessorArchitecture="x64" />
+
+  <Properties>
+    <!-- Must match the app name reserved in Partner Center; the widget's own
+         branding (shown on the Widgets Board) is set separately below. -->
+    <DisplayName>Token Cost Widget</DisplayName>
+    <PublisherDisplayName>moritalous</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.19041.0" MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="en-us" />
+    <Resource Language="ja-jp" />
+  </Resources>
+
+  <Applications>
+    <Application Id="CostWidgetProvider"
+                 Executable="CostWidgetProvider.exe"
+                 EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+          DisplayName="Token Cost Widget"
+          Description="Shows Claude Code token usage and costs on the Widgets Board"
+          BackgroundColor="transparent"
+          Square150x150Logo="Assets\Square150x150Logo.png"
+          Square44x44Logo="Assets\Square44x44Logo.png"
+          AppListEntry="none" />
+      <Extensions>
+        <com:Extension Category="windows.comServer">
+          <com:ComServer>
+            <com:ExeServer Executable="CostWidgetProvider.exe"
+                           Arguments="-RegisterProcessAsComServer"
+                           DisplayName="CostWidgetProvider">
+              <com:Class Id="6136713A-5359-4967-805F-3453FB1A076F" DisplayName="CostWidgetProvider" />
+            </com:ExeServer>
+          </com:ComServer>
+        </com:Extension>
+        <uap3:Extension Category="windows.appExtension">
+          <uap3:AppExtension Name="com.microsoft.windows.widgets"
+                             DisplayName="Token Cost Widget"
+                             Id="CostWidgetApp"
+                             PublicFolder="Public">
+            <uap3:Properties>
+              <WidgetProvider>
+                <ProviderIcons>
+                  <Icon Path="Assets\WidgetIcon.png" />
+                </ProviderIcons>
+                <Activation>
+                  <CreateInstance ClassId="6136713A-5359-4967-805F-3453FB1A076F" />
+                </Activation>
+                <Definitions>
+                  <Definition Id="Cost_Usage_Widget"
+                              DisplayName="Token Cost Widget"
+                              Description="Claude Code token usage and costs">
+                    <Capabilities>
+                      <Capability>
+                        <Size Name="small" />
+                      </Capability>
+                      <Capability>
+                        <Size Name="medium" />
+                      </Capability>
+                      <Capability>
+                        <Size Name="large" />
+                      </Capability>
+                    </Capabilities>
+                    <ThemeResources>
+                      <Icons>
+                        <Icon Path="Assets\WidgetIcon.png" />
+                      </Icons>
+                      <Screenshots>
+                        <Screenshot Path="Assets\Screenshot.png" DisplayAltText="ccusage usage and cost overview" />
+                      </Screenshots>
+                      <DarkMode />
+                      <LightMode />
+                    </ThemeResources>
+                  </Definition>
+                </Definitions>
+              </WidgetProvider>
+            </uap3:Properties>
+          </uap3:AppExtension>
+        </uap3:Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+  </Capabilities>
+</Package>

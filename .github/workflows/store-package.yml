@@ -1,0 +1,50 @@
+name: Store package
+
+# Builds the unsigned, Store-ready .msix and uploads it as a workflow artifact.
+# Download it from the run and upload it in Partner Center. Distribution is via
+# the Microsoft Store; GitHub hosts source only (no binary Releases).
+#
+# Requires three repository variables (Settings > Secrets and variables >
+# Actions > Variables), taken from Partner Center > Product identity:
+#   STORE_IDENTITY_NAME           e.g. moritalous.TokenCostWidget
+#   STORE_IDENTITY_PUBLISHER      e.g. CN=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+#   STORE_PUBLISHER_DISPLAY_NAME  e.g. moritalous
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Resolve version
+        id: ver
+        shell: pwsh
+        run: |
+          $ref = '${{ github.ref_name }}'
+          $app = $ref -replace '^v', ''
+          if ($app -notmatch '^\d+\.\d+\.\d+') {
+            $app = ([xml](Get-Content src/CostWidgetProvider/AppxManifest.xml)).Package.Identity.Version
+          }
+          "app=$app" >> $env:GITHUB_OUTPUT
+
+      - name: Pack Store MSIX
+        shell: pwsh
+        env:
+          STORE_IDENTITY_NAME: ${{ vars.STORE_IDENTITY_NAME }}
+          STORE_IDENTITY_PUBLISHER: ${{ vars.STORE_IDENTITY_PUBLISHER }}
+          STORE_PUBLISHER_DISPLAY_NAME: ${{ vars.STORE_PUBLISHER_DISPLAY_NAME }}
+        run: .\scripts\pack.ps1 -Version '${{ steps.ver.outputs.app }}'
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: store-msix
+          path: build/TokenCostWidget_*.msix
+          if-no-files-found: error

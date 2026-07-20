@@ -1,0 +1,258 @@
+{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "type": "AdaptiveCard",
+  "version": "1.5",
+  "body": [
+    {
+      "type": "TextBlock",
+      "text": "Updated ${updatedAt}",
+      "size": "small",
+      "isSubtle": true,
+      "horizontalAlignment": "right"
+    },
+    {
+      "type": "TextBlock",
+      "$when": "${hasError}",
+      "text": "${error}",
+      "wrap": true,
+      "size": "small",
+      "color": "attention"
+    },
+    {
+      "type": "Container",
+      "$when": "${!hasError}",
+      "height": "stretch",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "Current block ${blockRange}",
+          "size": "small",
+          "isSubtle": true
+        },
+        {
+          "type": "ColumnSet",
+          "spacing": "none",
+          "columns": [
+            {
+              "type": "Column",
+              "width": "auto",
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "${blockCost}",
+                  "size": "extraLarge",
+                  "weight": "bolder"
+                }
+              ]
+            },
+            {
+              "type": "Column",
+              "width": "stretch",
+              "verticalContentAlignment": "bottom",
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "${blockRemaining} left",
+                  "size": "small",
+                  "isSubtle": true,
+                  "horizontalAlignment": "right"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "TextBlock",
+          "text": "${blockBar}",
+          "color": "good",
+          "spacing": "none"
+        },
+        {
+          "type": "ColumnSet",
+          "spacing": "small",
+          "columns": [
+            {
+              "type": "Column",
+              "width": "stretch",
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "Burn rate",
+                  "size": "small",
+                  "isSubtle": true
+                },
+                {
+                  "type": "TextBlock",
+                  "text": "${blockBurnRate}",
+                  "weight": "bolder",
+                  "spacing": "none"
+                }
+              ]
+            },
+            {
+              "type": "Column",
+              "width": "stretch",
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "Projected",
+                  "size": "small",
+                  "isSubtle": true
+                },
+                {
+                  "type": "TextBlock",
+                  "text": "${blockProjectedCost}",
+                  "weight": "bolder",
+                  "spacing": "none"
+                },
+                {
+                  "type": "TextBlock",
+                  "text": "${blockProjectedTokens} tokens",
+                  "size": "small",
+                  "isSubtle": true,
+                  "spacing": "none"
+                }
+              ]
+            },
+            {
+              "type": "Column",
+              "width": "stretch",
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "Tokens",
+                  "size": "small",
+                  "isSubtle": true
+                },
+                {
+                  "type": "TextBlock",
+                  "text": "${blockTokens}",
+                  "weight": "bolder",
+                  "spacing": "none"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "ColumnSet",
+          "spacing": "medium",
+          "separator": true,
+          "columns": [
+            {
+              "type": "Column",
+              "width": "stretch",
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "Today",
+                  "size": "small",
+                  "isSubtle": true
+                },
+                {
+                  "type": "TextBlock",
+                  "text": "${todayCost}",
+                  "size": "large",
+                  "weight": "bolder",
+                  "spacing": "none"
+                },
+                {
+                  "type": "TextBlock",
+                  "text": "${todayTokens} tokens",
+                  "size": "small",
+                  "isSubtle": true,
+                  "spacing": "none"
+                }
+              ]
+            },
+            {
+              "type": "Column",
+              "width": "stretch",
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "This month (${monthLabel})",
+                  "size": "small",
+                  "isSubtle": true
+                },
+                {
+                  "type": "TextBlock",
+                  "text": "${monthCost}",
+                  "size": "large",
+                  "weight": "bolder",
+                  "spacing": "none"
+                },
+                {
+                  "type": "TextBlock",
+                  "text": "${monthTokens} tokens",
+                  "size": "small",
+                  "isSubtle": true,
+                  "spacing": "none"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "TextBlock",
+          "text": "By model (this month)",
+          "size": "small",
+          "isSubtle": true,
+          "spacing": "medium",
+          "separator": true
+        },
+        {
+          "type": "Container",
+          "spacing": "none",
+          "items": [
+            {
+              "$data": "${monthModels}",
+              "type": "ColumnSet",
+              "spacing": "none",
+              "columns": [
+                {
+                  "type": "Column",
+                  "width": "stretch",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "${name}",
+                      "size": "small",
+                      "isSubtle": true
+                    }
+                  ]
+                },
+                {
+                  "type": "Column",
+                  "width": "auto",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "${cost}",
+                      "size": "small",
+                      "weight": "bolder"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "spacing": "small",
+      "minHeight": "26px",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "Powered by ccusage ${ccusageVersion}",
+          "size": "small",
+          "isSubtle": true,
+          "horizontalAlignment": "center"
+        }
+      ]
+    }
+  ]
+}

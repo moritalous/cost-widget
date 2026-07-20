@@ -1,0 +1,65 @@
+{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "type": "AdaptiveCard",
+  "version": "1.5",
+  "body": [
+    {
+      "type": "TextBlock",
+      "text": "Updated ${updatedAt}",
+      "size": "small",
+      "isSubtle": true,
+      "horizontalAlignment": "right"
+    },
+    {
+      "type": "TextBlock",
+      "$when": "${hasError}",
+      "text": "${error}",
+      "wrap": true,
+      "size": "small",
+      "color": "attention",
+      "spacing": "small"
+    },
+    {
+      "type": "Container",
+      "$when": "${!hasError}",
+      "height": "stretch",
+      "spacing": "small",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "${blockCost}",
+          "size": "extraLarge",
+          "weight": "bolder"
+        },
+        {
+          "type": "TextBlock",
+          "text": "${blockRemaining} left",
+          "size": "small",
+          "isSubtle": true,
+          "spacing": "none"
+        },
+        {
+          "type": "TextBlock",
+          "text": "${blockBar}",
+          "color": "good",
+          "size": "small",
+          "spacing": "none"
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "spacing": "small",
+      "minHeight": "26px",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "Powered by ccusage ${ccusageVersion}",
+          "size": "small",
+          "isSubtle": true,
+          "horizontalAlignment": "center"
+        }
+      ]
+    }
+  ]
+}

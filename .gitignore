@@ -1,0 +1,7 @@
+bin/
+obj/
+build/
+*.user
+
+# Fetched at build time by scripts/fetch-ccusage.ps1
+src/CostWidgetProvider/Tools/
