@@ -1,5 +1,7 @@
 # Token Cost Widget
 
+[<img src="https://get.microsoft.com/images/en-us%20dark.svg" width="200"/>](https://apps.microsoft.com/detail/9NP02K9JKHNV)
+
 A Windows 11 **Widgets Board** (Win+W) widget that shows your coding agent token usage and costs, via ccusage's `daily` / `monthly` / `blocks` commands.
 
 ![Widget screenshot](src/CostWidgetProvider/Assets/Screenshot.png)
