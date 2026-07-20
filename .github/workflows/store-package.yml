@@ -63,11 +63,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           $runUrl = "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          $body = @"
-msix のビルドが完了しました。Partner Center でパッケージをアップロードしてください。
-
-- タグ: ${{ github.ref_name }}
-- ワークフロー実行: $runUrl
-- Partner Center: https://partner.microsoft.com/dashboard/products/9NP02K9JKHNV/overview
-"@
+          $lines = @(
+            'msix のビルドが完了しました。Partner Center でパッケージをアップロードしてください。'
+            ''
+            '- タグ: ${{ github.ref_name }}'
+            "- ワークフロー実行: $runUrl"
+            '- Partner Center: https://partner.microsoft.com/dashboard/products/9NP02K9JKHNV/overview'
+          )
+          $body = $lines -join "`n"
           gh issue create --title "Store 提出準備完了: ${{ github.ref_name }}" --body $body
