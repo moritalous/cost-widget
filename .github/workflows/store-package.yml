@@ -29,6 +29,10 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          # Full history + tags, needed to resolve the previous tag for the
+          # auto-generated release notes in the Notify step below.
+          fetch-depth: 0
 
       - uses: actions/setup-dotnet@v6
         with:
@@ -66,11 +70,37 @@ jobs:
         run: |
           $runUrl = "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           $lines = @(
-            'msix のビルドが完了しました。Partner Center でパッケージをアップロードしてください。'
+            'The msix build is done. Please upload the package in Partner Center.'
             ''
-            '- タグ: ${{ github.ref_name }}'
-            "- ワークフロー実行: $runUrl"
+            '- Tag: ${{ github.ref_name }}'
+            "- Workflow run: $runUrl"
             '- Partner Center: https://partner.microsoft.com/dashboard/products/9NP02K9JKHNV/overview'
           )
+
+          # Same content GitHub's "auto-generate release notes" produces, via
+          # the underlying API -- without creating an actual Release, since
+          # distribution here stays Store-only.
+          if ('${{ github.ref_type }}' -eq 'tag') {
+            $allTags = @(git tag -l --sort=-v:refname 'v*')
+            $idx = [Array]::IndexOf($allTags, '${{ github.ref_name }}')
+            $prevTag = $null
+            if ($idx -ge 0 -and $idx + 1 -lt $allTags.Length) {
+              $prevTag = $allTags[$idx + 1]
+            }
+
+            if ($prevTag) {
+              $notesJson = gh api "repos/${{ github.repository }}/releases/generate-notes" -f "tag_name=${{ github.ref_name }}" -f "previous_tag_name=$prevTag"
+            }
+            else {
+              $notesJson = gh api "repos/${{ github.repository }}/releases/generate-notes" -f "tag_name=${{ github.ref_name }}"
+            }
+            $notes = $notesJson | ConvertFrom-Json
+
+            $lines += ''
+            $lines += '---'
+            $lines += ''
+            $lines += $notes.body
+          }
+
           $body = $lines -join "`n"
-          gh issue create --title "Store 提出準備完了: ${{ github.ref_name }}" --body $body
+          gh issue create --title "Ready for Store submission: ${{ github.ref_name }}" --body $body
