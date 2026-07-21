@@ -126,7 +126,9 @@ internal static class UsageService
         }
 
         using var doc = JsonDocument.Parse(json);
-        if (!doc.RootElement.TryGetProperty("blocks", out var blocks))
+        if (doc.RootElement.ValueKind != JsonValueKind.Object ||
+            !doc.RootElement.TryGetProperty("blocks", out var blocks) ||
+            blocks.ValueKind != JsonValueKind.Array)
         {
             return;
         }
@@ -149,7 +151,7 @@ internal static class UsageService
                 data["blockRange"] = $"{startLocal:HH:mm}-{endLocal:HH:mm}";
             }
 
-            if (block.TryGetProperty("projection", out var projection))
+            if (block.TryGetProperty("projection", out var projection) && projection.ValueKind == JsonValueKind.Object)
             {
                 var remaining = projection.GetProperty("remainingMinutes").GetInt32();
                 data["blockRemaining"] = $"{remaining / 60}h {remaining % 60:00}m";
@@ -162,7 +164,7 @@ internal static class UsageService
                 data["blockBar"] = new string('▰', filled) + new string('▱', 10 - filled);
             }
 
-            if (block.TryGetProperty("burnRate", out var burnRate))
+            if (block.TryGetProperty("burnRate", out var burnRate) && burnRate.ValueKind == JsonValueKind.Object)
             {
                 data["blockBurnRate"] = FormatCost(burnRate.GetProperty("costPerHour").GetDouble()) + "/h";
             }
@@ -181,7 +183,9 @@ internal static class UsageService
         }
 
         using var doc = JsonDocument.Parse(json);
-        if (doc.RootElement.TryGetProperty("totals", out var totals))
+        if (doc.RootElement.ValueKind == JsonValueKind.Object &&
+            doc.RootElement.TryGetProperty("totals", out var totals) &&
+            totals.ValueKind == JsonValueKind.Object)
         {
             data["todayCost"] = FormatCost(totals.GetProperty("totalCost").GetDouble());
             data["todayTokens"] = FormatTokens(totals.GetProperty("totalTokens").GetInt64());
@@ -200,23 +204,34 @@ internal static class UsageService
         }
 
         using var doc = JsonDocument.Parse(json);
-        if (doc.RootElement.TryGetProperty("totals", out var totals))
+        if (doc.RootElement.ValueKind != JsonValueKind.Object)
+        {
+            return;
+        }
+
+        if (doc.RootElement.TryGetProperty("totals", out var totals) && totals.ValueKind == JsonValueKind.Object)
         {
             data["monthCost"] = FormatCost(totals.GetProperty("totalCost").GetDouble());
             data["monthTokens"] = FormatTokens(totals.GetProperty("totalTokens").GetInt64());
         }
 
-        if (doc.RootElement.TryGetProperty("monthly", out var monthly))
+        if (doc.RootElement.TryGetProperty("monthly", out var monthly) && monthly.ValueKind == JsonValueKind.Array)
         {
             var byModel = new Dictionary<string, double>();
             foreach (var month in monthly.EnumerateArray())
             {
-                if (!month.TryGetProperty("modelBreakdowns", out var breakdowns))
+                if (month.ValueKind != JsonValueKind.Object ||
+                    !month.TryGetProperty("modelBreakdowns", out var breakdowns) ||
+                    breakdowns.ValueKind != JsonValueKind.Array)
                 {
                     continue;
                 }
                 foreach (var breakdown in breakdowns.EnumerateArray())
                 {
+                    if (breakdown.ValueKind != JsonValueKind.Object)
+                    {
+                        continue;
+                    }
                     var name = breakdown.GetProperty("modelName").GetString() ?? "unknown";
                     byModel[name] = byModel.GetValueOrDefault(name) + breakdown.GetProperty("cost").GetDouble();
                 }
