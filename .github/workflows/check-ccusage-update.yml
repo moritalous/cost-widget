@@ -1,10 +1,11 @@
 name: Check ccusage update
 
 # Checks the npm registry once a day for a newer ccusage native binary. If one
-# is found, bumps ccusage.version and the app's patch version, then pushes a
-# new tag. That tag push triggers store-package.yml, which builds the Store
-# msix and (on success) opens an issue as a reminder to upload it in Partner
-# Center. The actual Store submission stays manual.
+# is found, bumps ccusage.version and the app's patch version, pushes a new
+# tag, and dispatches store-package.yml for it, which builds the Store msix
+# and (on success) opens an issue as a reminder to upload it in Partner
+# Center. The dispatch is explicit because tags pushed with GITHUB_TOKEN never
+# fire on-push workflows. The actual Store submission stays manual.
 on:
   schedule:
     - cron: '0 0 * * *' # 09:00 JST daily
@@ -12,6 +13,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   check:
@@ -66,3 +68,13 @@ jobs:
           git tag "v${{ steps.bump.outputs.new_app }}"
           git push origin main
           git push origin "v${{ steps.bump.outputs.new_app }}"
+
+      - name: Trigger Store package build
+        if: steps.compare.outputs.changed == 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run store-package.yml \
+            -R "${{ github.repository }}" \
+            --ref "v${{ steps.bump.outputs.new_app }}"
