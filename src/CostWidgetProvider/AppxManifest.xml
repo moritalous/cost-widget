@@ -10,7 +10,7 @@
   <!-- App semantic version + trailing 0. The bundled ccusage version is pinned in ccusage.version. -->
   <Identity Name="CostWidget"
             Publisher="CN=moritalous"
-            Version="0.1.1.0"
+            Version="0.1.2.0"
             ProcessorArchitecture="x64" />
 
   <Properties>
