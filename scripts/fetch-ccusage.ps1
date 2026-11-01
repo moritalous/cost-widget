@@ -52,7 +52,7 @@ try {
         tar -xzf main.tgz -C main
         if ($LASTEXITCODE -ne 0) { throw "tar extract failed ($LASTEXITCODE)" }
         if (-not (Test-Path .\main\package\LICENSE)) {
-            throw "ccusage $Version: LICENSE not found in either @ccusage/ccusage-win32-x64 or ccusage package."
+            throw "ccusage ${Version}: LICENSE not found in either @ccusage/ccusage-win32-x64 or ccusage package."
         }
         Copy-Item .\main\package\LICENSE $licenseDest -Force
     }
