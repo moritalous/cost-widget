@@ -133,4 +133,4 @@ Pushing a `v*` tag (or running the **Store package** workflow manually) builds a
 
 This project is licensed under the [MIT License](LICENSE).
 
-The bundled ccusage binary ([@ccusage/ccusage-win32-x64](https://www.npmjs.com/package/@ccusage/ccusage-win32-x64)) is also MIT-licensed by the [ccusage](https://github.com/ccusage/ccusage) project. Its license text is not in this repository; it is downloaded together with the binary at build time and included in the distributed package as `package\Tools\LICENSE-ccusage.txt`.
+The bundled ccusage binary ([@ccusage/ccusage-win32-x64](https://www.npmjs.com/package/@ccusage/ccusage-win32-x64)) is also MIT-licensed by the [ccusage](https://github.com/ccusage/ccusage) project. Its license text is not in this repository; it is downloaded at build time (from the platform package, or from the main `ccusage` package of the same version if the platform package does not ship one) and included in the distributed package as `package\Tools\LICENSE-ccusage.txt`.

@@ -35,7 +35,27 @@ try {
 
     New-Item -ItemType Directory -Force $toolsDir | Out-Null
     Copy-Item .\package\bin\ccusage.exe $exePath -Force
-    Copy-Item .\package\LICENSE (Join-Path $toolsDir 'LICENSE-ccusage.txt') -Force
+
+    # The platform package used to ship LICENSE (up to 20.0.19) but no longer
+    # does (from 20.0.20). Fall back to the LICENSE in the main `ccusage`
+    # package of the same version, and fail loudly if neither has one so the
+    # bundled package never ships without the license text.
+    $licenseDest = Join-Path $toolsDir 'LICENSE-ccusage.txt'
+    if (Test-Path .\package\LICENSE) {
+        Copy-Item .\package\LICENSE $licenseDest -Force
+    }
+    else {
+        $mainUrl = "https://registry.npmjs.org/ccusage/-/ccusage-$Version.tgz"
+        Write-Host "LICENSE not in the platform package; downloading $mainUrl ..."
+        New-Item -ItemType Directory -Force main | Out-Null
+        Invoke-WebRequest -Uri $mainUrl -OutFile main.tgz
+        tar -xzf main.tgz -C main
+        if ($LASTEXITCODE -ne 0) { throw "tar extract failed ($LASTEXITCODE)" }
+        if (-not (Test-Path .\main\package\LICENSE)) {
+            throw "ccusage $Version: LICENSE not found in either @ccusage/ccusage-win32-x64 or ccusage package."
+        }
+        Copy-Item .\main\package\LICENSE $licenseDest -Force
+    }
 }
 finally {
     Pop-Location
